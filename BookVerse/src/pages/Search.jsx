@@ -1,4 +1,3 @@
-// --- src/pages/Search.jsx ---
 import { useState, useEffect, useRef } from 'react'
 import { searchBooks } from '../services/bookAPI'
 import BookCard from '../components/BookCard'
@@ -13,7 +12,9 @@ export default function Search() {
   const searchInputRef = useRef(null)
 
   useEffect(() => {
-    if (query) handleSearch()
+    if (query) {
+      handleSearch()
+    }
   }, [])
 
   const handleSearch = async () => {
@@ -24,22 +25,24 @@ export default function Search() {
 
   const handleSend = async () => {
     if (!input.trim()) return
-    const userMessage = { sender: 'user', text: input }
-    setMessages((prev) => [...prev, userMessage])
+    const userMessage = { role: 'user', content: input }
+    const updated = [...messages, userMessage]
+    setMessages(updated)
     setInput('')
 
     try {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: input })
+        body: JSON.stringify({ messages: updated })
       })
 
       const data = await response.json()
-      setMessages((prev) => [...prev, { sender: 'bot', text: data.reply || 'No reply' }])
+      const botReply = data.reply || 'No response'
+      setMessages([...updated, { role: 'assistant', content: botReply }])
     } catch (err) {
       console.error('[BookVerse] Chat error:', err)
-      setMessages((prev) => [...prev, { sender: 'bot', text: "Something went wrong. Try again." }])
+      setMessages([...updated, { role: 'assistant', content: 'Something went wrong.' }])
     }
   }
 
@@ -90,17 +93,12 @@ export default function Search() {
         <div className="bg-white rounded shadow p-4 text-black">
           <div className="h-48 overflow-y-auto border p-2 rounded mb-3 bg-neutral-100">
             {messages.map((msg, index) => (
-              <div
-                key={index}
-                className={`mb-2 ${msg.sender === 'user' ? 'text-right' : 'text-left text-blue-600'}`}
-              >
-                <span className="inline-block px-2 py-1 rounded bg-gray-200">
-                  {msg.text}
-                </span>
+              <div key={index} className={`mb-2 ${msg.role === 'user' ? 'text-right' : 'text-left text-blue-600'}`}>
+                <span className="inline-block px-2 py-1 rounded bg-gray-200">{msg.content}</span>
               </div>
             ))}
           </div>
-          <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); handleSend(); }}>
+          <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); handleSend() }}>
             <input
               ref={inputRef}
               type="text"
