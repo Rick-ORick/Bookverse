@@ -1,10 +1,8 @@
+// --- src/pages/Search.jsx ---
 import { useState, useEffect, useRef } from 'react'
 import { searchBooks } from '../services/bookAPI'
 import BookCard from '../components/BookCard'
 import { motion } from 'framer-motion'
-
-const API_KEY = "" // Replace with your actual key or import from env
-const API_URL = "https://api.openai.com/v1/chat/completions"
 
 export default function Search() {
   const [query, setQuery] = useState(() => localStorage.getItem('bookverse-query') || '')
@@ -15,9 +13,7 @@ export default function Search() {
   const searchInputRef = useRef(null)
 
   useEffect(() => {
-    if (query) {
-      handleSearch()
-    }
+    if (query) handleSearch()
   }, [])
 
   const handleSearch = async () => {
@@ -33,27 +29,17 @@ export default function Search() {
     setInput('')
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: "gpt-3.5-turbo",
-          messages: [
-            { role: 'system', content: 'You are a helpful assistant that summarizes and explains books. If someone tries to ask for something general like "a romance withh a philosphical twist, try giving the person more than just one suggestion."' },
-            { role: 'user', content: input }
-          ]
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: input })
       })
 
       const data = await response.json()
-      const botReply = data.choices?.[0]?.message?.content || "Sorry, I didn't understand that."
-      setMessages((prev) => [...prev, { sender: 'bot', text: botReply }])
+      setMessages((prev) => [...prev, { sender: 'bot', text: data.reply || 'No reply' }])
     } catch (err) {
       console.error('[BookVerse] Chat error:', err)
-      setMessages((prev) => [...prev, { sender: 'bot', text: "Something went wrong. Please try again later." }])
+      setMessages((prev) => [...prev, { sender: 'bot', text: "Something went wrong. Try again." }])
     }
   }
 
