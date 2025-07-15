@@ -32,7 +32,7 @@ export default function Home() {
             <h2 className="text-2xl font-semibold mb-2">About BookVerse</h2>
             <p className="text-neutral-400">
               This is an interactive, AI-assisted virtual book library made with heavy use of the React Framework. <br />
-              For more information, visit my{' '}
+              For more information, visit my{' '}  
               <a
                 href="https://portfolio-git-main-ricks-projects-08c86335.vercel.app/"
                 target="_blank"
